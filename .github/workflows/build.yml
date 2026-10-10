@@ -1,22 +1,21 @@
-name: EQo Build
+
+name: EQo ZIP Check
 
 on: [push, workflow_dispatch]
 
 permissions:
-contents: read
+  contents: read
 
 jobs:
-inspect:
-runs-on: ubuntu-latest
-steps:
-- name: Checkout repository
-uses: actions/checkout@v4
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  - name: Check ZIP exists
-    run: test -f q14-audio-lab.zip
+      - name: Check ZIP exists
+        run: test -f q14-audio-lab.zip
 
-  - name: Inspect ZIP
-    run: |
-      sudo apt-get update
-      sudo apt-get install -y unzip
-      unzip -l q14-audio-lab.zip
+      - name: List ZIP contents
+        run: unzip -l q14-audio-lab.zip
+        
