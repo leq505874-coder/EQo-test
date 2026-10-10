@@ -1,61 +1,22 @@
 name: EQo Build
 
-on:
-push:
-workflow_dispatch:
+on: [push, workflow_dispatch]
 
 permissions:
 contents: read
 
 jobs:
-inspect-and-build:
+inspect:
 runs-on: ubuntu-latest
-
 steps:
-  - name: Checkout repository
-    uses: actions/checkout@v4
+- name: Checkout repository
+uses: actions/checkout@v4
 
-  - name: Extract project ZIP
+  - name: Check ZIP exists
+    run: test -f q14-audio-lab.zip
+
+  - name: Inspect ZIP
     run: |
-      unzip -o q14-audio-lab.zip -d extracted
-      echo "=== Project files ==="
-      find extracted -maxdepth 4 -type f | sort | head -200
-
-  - name: Locate Android project
-    id: android
-    run: |
-      if find extracted -name gradlew -type f | grep -q .; then
-        echo "found=true" >> "$GITHUB_OUTPUT"
-      else
-        echo "found=false" >> "$GITHUB_OUTPUT"
-      fi
-
-  - name: Set up Java
-    if: steps.android.outputs.found == 'true'
-    uses: actions/setup-java@v4
-    with:
-      distribution: temurin
-      java-version: '17'
-
-  - name: Build APK
-    if: steps.android.outputs.found == 'true'
-    run: |
-      GRADLEW="$(find extracted -name gradlew -type f | head -1)"
-      PROJECT_DIR="$(dirname "$GRADLEW")"
-      chmod +x "$GRADLEW"
-      cd "$PROJECT_DIR"
-      ./gradlew assembleDebug
-
-  - name: Upload APK
-    if: steps.android.outputs.found == 'true'
-    uses: actions/upload-artifact@v4
-    with:
-      name: EQo-debug-APK
-      path: extracted/**/build/outputs/apk/debug/*.apk
-      if-no-files-found: error
-
-  - name: Report missing Android project
-    if: steps.android.outputs.found != 'true'
-    run: |
-      echo "::error::ZIP chưa có Gradle Wrapper. Chưa thể build APK."
-      exit 1
+      sudo apt-get update
+      sudo apt-get install -y unzip
+      unzip -l q14-audio-lab.zip
